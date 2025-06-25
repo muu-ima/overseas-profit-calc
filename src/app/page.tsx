@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getCheapestShipping, ShippingData } from "@/lib/shipping";
+import ExchangeRate  from "./components/ExchangeRate";
 
 // ここから型定義を追加
 type ShippingResult = {
@@ -25,6 +26,7 @@ export default function Page() {
     width: 0,
     height: 0,
   });
+  const [rate, setRate] = useState<number | null>(null);
   const [categoryOptions, setCategoryOptions] = useState<CategoryFeeType[]>([]);
   const [selectedCategoryFee, setSelectedCategoryFee] = useState<number | "">(
     ""
@@ -43,6 +45,11 @@ export default function Page() {
       .then((data) => setCategoryOptions(data));
   }, []);
 
+  useEffect(() =>{
+    if (rate !== null) {
+      console.log(`最新為替レート：, rate`);
+    }
+  },[rate]);
 
   useEffect(() => {
     if (shippingRates && weight !== null && weight > 0) {
@@ -53,6 +60,8 @@ export default function Page() {
 
   return (
     <div className="p-4 max-w-sm mx-auto flex flex-col space-y-4">
+          {/* 為替レート表示コンポーネント */}
+    <ExchangeRate onRateChange={setRate} />
       <input
         type="number"
         value={costPrice}
