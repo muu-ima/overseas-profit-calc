@@ -3,6 +3,15 @@
 import { useEffect, useState } from "react";
 import { getCheapestShipping, ShippingData } from "@/lib/shipping";
 import ExchangeRate  from "./components/ExchangeRate";
+import Result from "./components/Result";
+import {
+  calculateCategoryFee,
+  convertShippingPriceToJPY,
+  calculateActualCost,
+  calculateGrossProfit,
+  calculateProfitMargin,
+} from "@/lib/profitCalc";
+import { Shippori_Antique } from "next/font/google";
 
 // ここから型定義を追加
 type ShippingResult = {
@@ -15,6 +24,15 @@ type CategoryFeeType = {
   value: number;
   categories: string[];
 };
+
+type CalcResult = {
+  shippingJPY: number,
+  categoryFeeJPY: number;
+  actualCost: number;
+  grossProfit: number;
+  profitMargin: number;
+  method: string;
+}
 
 export default function Page() {
   const [shippingRates, setShippingRates] = useState<ShippingData | null>(null);
@@ -32,12 +50,60 @@ export default function Page() {
     ""
   );
   const [result, setResult] = useState<ShippingResult | null>(null);
+  const [calcResult, setCalcResult] = useState<CalcResult | null>(null);
 
   useEffect(() => {
     fetch("/data/shipping.json")
       .then((res) => res.json())
       .then((data) => setShippingRates(data));
   }, []);
+
+  // 計算結果用のuseEffect
+  useEffect(() => {
+    if(
+      sellingPrice !=="" &&
+      costPrice !=="" &&
+      rate !== null &&
+      weight !== null &&
+      result !== null &&
+      result .price !== null &&
+      selectedCategoryFee !==""
+    ){
+      //配送料JPYに換算
+      const shippingJPY = convertShippingPriceToJPY(result.price, rate);
+
+      //カテゴリ手数料JPY計算
+      const categoryFeeJPY = calculateCategoryFee(
+        typeof sellingPrice === "number" ? sellingPrice:0,
+        typeof selectedCategoryFee === "number" ? selectedCategoryFee:0
+      );
+
+      //実費合計
+      const actualCost = calculateActualCost(
+        typeof costPrice === "number" ? costPrice : 0,
+        shippingJPY,
+        categoryFeeJPY
+      );
+      //粗利計算
+      const grossProfit = calculateGrossProfit(
+        typeof sellingPrice === "number" ? sellingPrice:0,
+        actualCost
+      );
+      //利益率計算
+      const profitMargin = calculateProfitMargin(grossProfit, 
+        typeof sellingPrice === "number" ? sellingPrice : 0
+      );
+      
+      setCalcResult({
+        shippingJPY,
+        categoryFeeJPY,
+        actualCost,
+        grossProfit,
+        profitMargin,
+        method: result.method,
+      });
+    }
+  })
 
   useEffect(() => {
     fetch("/data/categoryFees.json")
@@ -131,6 +197,15 @@ export default function Page() {
           </option>
         ))}
       </select>
+
+      {rate !== null && sellingPrice !== "" && (
+        <Result
+          priceGBP={typeof sellingPrice === "number" ? sellingPrice / rate:0}
+          rate={rate}
+          includeVAT={true} //または切り替え機能を後から追加
+          calcResult={calcResult}
+        />
+      )}
     </div>
   );
 }
