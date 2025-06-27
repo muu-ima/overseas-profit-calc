@@ -1,7 +1,5 @@
 // /lib/shipping.ts
 
-import { Preahvihear } from "next/font/google";
-
 export type ShippingOption = {
   weight: number;
   price: number;
