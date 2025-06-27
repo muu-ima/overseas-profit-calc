@@ -11,7 +11,6 @@ import {
   calculateGrossProfit,
   calculateProfitMargin,
 } from "@/lib/profitCalc";
-import { Shippori_Antique } from "next/font/google";
 
 // ここから型定義を追加
 type ShippingResult = {
@@ -103,7 +102,7 @@ export default function Page() {
         method: result.method,
       });
     }
-  })
+  },[sellingPrice, costPrice, rate, weight, result, selectedCategoryFee]);
 
   useEffect(() => {
     fetch("/data/categoryFees.json")

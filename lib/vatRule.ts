@@ -4,12 +4,12 @@ const GBP_THRESHOLD = 135;
 const VAT_RATE = 0.2//20%
 
 /**
- * 135ポンド以下かどうかを判定
+ * 135ポンド未満かどうかを判定
  * @param priceGBP GBP価格
  */
 
 export function isUnder135GBP(priceGBP: number): boolean {
-    return priceGBP <= GBP_THRESHOLD;
+    return priceGBP < GBP_THRESHOLD;
 }
 
 /**

@@ -8,6 +8,7 @@ type ResultProps = {
     priceGBP: number;
     rate: number;
     includeVAT: boolean;
+    calcResult: any;
 };
 
 export default function Result({ priceGBP, rate, includeVAT }: ResultProps) {
